@@ -23,7 +23,7 @@ public class RetrofitFactory {
 
     public static final String BASE_URL = "https://en.wikipedia.org/";
 
-    static final String get = "/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&generator=prefixsearch&redirects=1&formatversion=2&piprop=thumbnail&pithumbsize=50&pilimit=10&wbptterms=description&gpslimit=10&";
+    static final String get = "/w/api.php?action=query&format=json&prop=pageimages%7Cpageterms&generator=prefixsearch&redirects=1&formatversion=2&piprop=thumbnail&pithumbsize=150&pilimit=10&wbptterms=description&gpslimit=10&";
     static final String query = "gpssearch";
 
     public static Retrofit getRetrofitClient(String baseUrl){

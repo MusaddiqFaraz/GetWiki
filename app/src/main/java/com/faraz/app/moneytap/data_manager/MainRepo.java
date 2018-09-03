@@ -63,17 +63,22 @@ public class MainRepo {
                 .observeOn(appRxSchedulers.getMain());
     }
 
-    public Observable<List<Page>> getSearchResults(String search,String actualSearch) {
+    public Observable<Resource> getSearchResults(String search,String actualSearch) {
         return  Observable.concat(pageDao.getAllPages(search).toObservable()
                 .onErrorResumeNext(throwable ->{
                     throwable.printStackTrace();
                     return Observable.just(new ArrayList<Page>()); })
+                //convert the result from list to resource type
+                .map(results -> { return  new Resource(Resource.Source.Database,results); })
                 .subscribeOn(appRxSchedulers.getIo())
+                //get from network
                 ,searchForWords(search,actualSearch))
-                .filter(pages ->
-                        !pages.isEmpty() &&
-                                (currentTime - pages.get(0).getTimeStamp()) < ttl)
-                .first(Collections.emptyList())
+
+                //this will filter out the result which is empty or stale(older than 24 hrs)
+                .filter(result ->
+                        !result.getData().isEmpty() && (currentTime - result.getData().get(0).getTimeStamp()) < ttl)
+
+                .first(new Resource(Resource.Source.Network,Collections.emptyList()))
                 .toObservable()
                 .observeOn(appRxSchedulers.getMain());
 
@@ -81,8 +86,9 @@ public class MainRepo {
     }
 
 
-    private Observable<List<Page>> searchForWords(String search, String actualSearch) {
+    private Observable<Resource> searchForWords(String search, String actualSearch) {
         return apiInterface.getResult(search)
+                //when the network call is completed save the query and result in db with current timestamp
                 .doAfterNext(resultResponse -> {
                     if(resultResponse.body() != null) {
 
@@ -97,16 +103,18 @@ public class MainRepo {
 
 //                        pageDao.insertAll(.);
                     }
-                }).map(resultResponse -> {
+                })
+                //convert the result to resource type
+                .map(resultResponse -> {
                     if (resultResponse.body().getQuery() == null)
-                       return new ArrayList<Page>();
+                       return new Resource(Resource.Source.Network,new ArrayList<Page>());
                     else
                     {
                         List<Page> pages = resultResponse.body().getQuery().getPages();
                         for (Page page:pages) {
                             page.setTimeStamp(currentTime);
                         }
-                        return pages;
+                        return new Resource(Resource.Source.Network,pages);
                     }
 
                 } ).subscribeOn(appRxSchedulers.getIo());

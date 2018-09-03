@@ -36,15 +36,34 @@
                 android:id="@+id/acSearch"
                 />
 
-            <Button
+            <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.2"
-                android:background="@color/colorPrimary"
-                android:id="@+id/btnFetch"
-                android:text="Search"
-                android:textColor="#fff"
-                />
+                android:layout_weight="0.25">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/btnFetch"
+                    android:text="Search"
+                    android:textColor="#fff"
+                    android:background="@drawable/rounded_border_background"
+                    />
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/pbFetch"
+                    android:theme="@style/AppTheme.WhiteAccent"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone"
+                    android:elevation="3dp"
+                    />
+
+            </RelativeLayout>
+
+
 
         </LinearLayout>
 

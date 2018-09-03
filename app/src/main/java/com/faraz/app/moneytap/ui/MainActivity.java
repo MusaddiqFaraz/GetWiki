@@ -15,11 +15,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.faraz.app.moneytap.R;
 import com.faraz.app.moneytap.ViewModelFactory;
 import com.faraz.app.moneytap.data_manager.AppRxSchedulers;
 import com.faraz.app.moneytap.data_manager.MainRepo;
+import com.faraz.app.moneytap.data_manager.Resource;
 import com.faraz.app.moneytap.data_manager.RxBus;
 import com.faraz.app.moneytap.data_manager.api.Page;
 
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
     AppCompatAutoCompleteTextView autoCompleteTextView;
     Button btnfetch;
     RecyclerView rvSearchResult;
+    ProgressBar pbFetch;
 
     private Disposable clickDisposable;
 
@@ -67,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         autoCompleteTextView = (AppCompatAutoCompleteTextView)findViewById(R.id.acSearch);
         btnfetch = (Button) findViewById(R.id.btnFetch);
         rvSearchResult = (RecyclerView)findViewById(R.id.rvSearchResult);
+        pbFetch = (ProgressBar) findViewById(R.id.pbFetch);
         rvSearchResult.setLayoutManager(new LinearLayoutManager(this));
 
         mainVM = ViewModelProviders.of(this,viewModelFactory).get(MainVM.class);
@@ -119,20 +124,23 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
 
 
     private void getSearch(String search) {
+        showProgressBar(true);
         mainVM.getSearchResult(search)
-                .subscribe(new Observer<List<Page>>() {
+                .subscribe(new Observer<Resource>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(List<Page> pages) {
-                        Log.d("MainAct","pages result "+pages);
+                    public void onNext(Resource result) {
+                        showProgressBar(false);
+                        Log.d("MainAct","pages result "+result.getData());
                         setSearchAdapter();
 
+                        Toast.makeText(MainActivity.this,"From "+result.getSource(),Toast.LENGTH_SHORT).show();
 
-                        resultRecyclerAdapter =new SearchResultRecyclerAdapter(new ArrayList<>(pages),MainActivity.this);
+                        resultRecyclerAdapter =new SearchResultRecyclerAdapter(new ArrayList<>(result.getData()),MainActivity.this);
                         rvSearchResult.setAdapter(resultRecyclerAdapter);
                         resultRecyclerAdapter.notifyDataSetChanged();
 
@@ -140,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
 
                     @Override
                     public void onError(Throwable e) {
+                        showProgressBar(false);
                         e.printStackTrace();
                     }
 
@@ -149,6 +158,18 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                     }
                 });
     }
+
+    private void  showProgressBar(Boolean show){
+        if(show) {
+            btnfetch.setText("");
+            pbFetch.setVisibility(View.VISIBLE);
+        } else {
+            btnfetch.setText("Search");
+            pbFetch.setVisibility(View.GONE);
+        }
+
+    }
+
 
     @Override
     public AndroidInjector<Fragment> fragmentInjector() {

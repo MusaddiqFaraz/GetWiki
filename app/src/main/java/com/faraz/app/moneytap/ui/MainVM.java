@@ -3,6 +3,7 @@ package com.faraz.app.moneytap.ui;
 import android.arch.lifecycle.ViewModel;
 
 import com.faraz.app.moneytap.data_manager.MainRepo;
+import com.faraz.app.moneytap.data_manager.Resource;
 import com.faraz.app.moneytap.data_manager.api.Page;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class MainVM extends ViewModel {
         this.mainRepo = mainRepo;
     }
 
-    Observable<List<Page>> getSearchResult(String search){
+    Observable<Resource> getSearchResult(String search){
         return mainRepo.getSearchResults("%"+search+"%",search);
     }
 

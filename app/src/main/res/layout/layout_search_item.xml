@@ -33,6 +33,8 @@
             android:textSize="16sp"
             android:maxLines="1"
             android:ellipsize="end"
+            android:textColor="#555"
+            android:textStyle="bold"
             tools:text="Title"/>
 
         <TextView
@@ -43,6 +45,7 @@
             tools:text="This is a description"
             android:maxLines="2"
             android:ellipsize="end"
+            android:textColor="#777"
             android:layout_marginTop="10dp"/>
 
     </LinearLayout>
