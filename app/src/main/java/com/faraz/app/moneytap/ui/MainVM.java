@@ -26,9 +26,10 @@ public class MainVM extends ViewModel {
         this.mainRepo = mainRepo;
     }
 
-    Observable<Resource> getSearchResult(String search){
-        return mainRepo.getSearchResults("%"+search+"%",search);
+    Observable<Resource> getSearchResult(String search) {
+        return mainRepo.getSearchResults("%" + search + "%", search);
     }
+
 
     Observable<ArrayList<String>> getAllSearches() {
         return mainRepo.getAllPreviousSearches();

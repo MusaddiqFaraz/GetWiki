@@ -53,7 +53,7 @@ public class MainRepo {
     public Observable<ArrayList<String>> getAllPreviousSearches() {
         return searchDao.getAllQueries().map(result -> {
             ArrayList<String> stringList = new ArrayList<>();
-            for (SearchQuery searchQuery: result)
+            for (SearchQuery searchQuery : result)
                 stringList.add(searchQuery.getSearch());
 
             return stringList;
@@ -63,22 +63,27 @@ public class MainRepo {
                 .observeOn(appRxSchedulers.getMain());
     }
 
-    public Observable<Resource> getSearchResults(String search,String actualSearch) {
-        return  Observable.concat(pageDao.getAllPages(search).toObservable()
-                .onErrorResumeNext(throwable ->{
-                    throwable.printStackTrace();
-                    return Observable.just(new ArrayList<Page>()); })
-                //convert the result from list to resource type
-                .map(results -> { return  new Resource(Resource.Source.Database,results); })
-                .subscribeOn(appRxSchedulers.getIo())
+    public Observable<Resource> getSearchResults(String search, String actualSearch) {
+        return Observable.concat(pageDao.getAllPages(search).toObservable()
+                        //in case there is no result from database, single throws exception we resume our operation by emitting empty list
+                        .onErrorResumeNext(throwable -> {
+                            throwable.printStackTrace();
+                            return Observable.just(new ArrayList<Page>());
+                        })
+                        //convert the result from list to resource type
+                        .map(results -> {
+                            return new Resource(Resource.Source.Database, results);
+                        })
+                        .subscribeOn(appRxSchedulers.getIo())
                 //get from network
-                ,searchForWords(search,actualSearch))
+                , searchForWords(search, actualSearch))
 
                 //this will filter out the result which is empty or stale(older than 24 hrs)
                 .filter(result ->
                         !result.getData().isEmpty() && (currentTime - result.getData().get(0).getTimeStamp()) < ttl)
-
-                .first(new Resource(Resource.Source.Network,Collections.emptyList()))
+                //deafult resource in case anything fails
+                .first(new Resource(Resource.Source.Network, Collections.emptyList()))
+                //convert to observable
                 .toObservable()
                 .observeOn(appRxSchedulers.getMain());
 
@@ -90,12 +95,12 @@ public class MainRepo {
         return apiInterface.getResult(search)
                 //when the network call is completed save the query and result in db with current timestamp
                 .doAfterNext(resultResponse -> {
-                    if(resultResponse.body() != null) {
+                    if (resultResponse.body() != null) {
 
                         List<Page> pages = resultResponse.body().getQuery().getPages();
                         moneyTapDB.runInTransaction(() -> {
                             searchDao.insertSearch(new SearchQuery(actualSearch));
-                            for (Page page:pages) {
+                            for (Page page : pages) {
                                 page.setTimeStamp(currentTime);
                                 pageDao.insertAll(page);
                             }
@@ -106,18 +111,20 @@ public class MainRepo {
                 })
                 //convert the result to resource type
                 .map(resultResponse -> {
+
+                    //if result from network is empty return empty resource
                     if (resultResponse.body().getQuery() == null)
-                       return new Resource(Resource.Source.Network,new ArrayList<Page>());
-                    else
-                    {
+                        return new Resource(Resource.Source.Network, new ArrayList<Page>());
+                        //else for each page insert current timestamp, since we need timestamp in filter method to check
+                    else {
                         List<Page> pages = resultResponse.body().getQuery().getPages();
-                        for (Page page:pages) {
+                        for (Page page : pages) {
                             page.setTimeStamp(currentTime);
                         }
-                        return new Resource(Resource.Source.Network,pages);
+                        return new Resource(Resource.Source.Network, pages);
                     }
 
-                } ).subscribeOn(appRxSchedulers.getIo());
+                }).subscribeOn(appRxSchedulers.getIo());
     }
 
 

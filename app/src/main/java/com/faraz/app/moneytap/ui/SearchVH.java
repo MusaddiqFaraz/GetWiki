@@ -31,19 +31,19 @@ public class SearchVH extends RecyclerView.ViewHolder {
 
 
     void bindSearchItem(Page page, int position) {
-        if(page.getThumbnail() != null)
+        if (page.getThumbnail() != null)
             Glide.with(itemView.getContext())
                     .load(page.getThumbnail().getSource())
                     .into(ivImage);
 
 
         tvTitle.setText(page.getTitle());
-        if(page.getTerms() != null && page.getTerms().getDescription() != null && !page.getTerms().getDescription().isEmpty() )
+        if (page.getTerms() != null && page.getTerms().getDescription() != null && !page.getTerms().getDescription().isEmpty())
             tvDescription.setText(page.getTerms().getDescription().get(0));
 
-        itemView.setOnClickListener( view -> {
+        itemView.setOnClickListener(view -> {
 
-            String url = "http://en.wikipedia.org/?curid="+page.getPageid();
+            String url = "http://en.wikipedia.org/?curid=" + page.getPageid();
 
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
             builder.setToolbarColor(Color.WHITE);

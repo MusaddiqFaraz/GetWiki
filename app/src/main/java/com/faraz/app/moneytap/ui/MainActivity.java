@@ -68,13 +68,13 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         setContentView(R.layout.activity_main);
 
 
-        autoCompleteTextView = (AppCompatAutoCompleteTextView)findViewById(R.id.acSearch);
+        autoCompleteTextView = (AppCompatAutoCompleteTextView) findViewById(R.id.acSearch);
         btnfetch = (Button) findViewById(R.id.btnFetch);
-        rvSearchResult = (RecyclerView)findViewById(R.id.rvSearchResult);
+        rvSearchResult = (RecyclerView) findViewById(R.id.rvSearchResult);
         pbFetch = (ProgressBar) findViewById(R.id.pbFetch);
         rvSearchResult.setLayoutManager(new LinearLayoutManager(this));
 
-        mainVM = ViewModelProviders.of(this,viewModelFactory).get(MainVM.class);
+        mainVM = ViewModelProviders.of(this, viewModelFactory).get(MainVM.class);
 
         setSearchAdapter();
 
@@ -83,9 +83,9 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
 
     private void initViews() {
         btnfetch.setOnClickListener(view -> {
-            if(autoCompleteTextView.getText().length() > 1)
-                getSearch(autoCompleteTextView.getText().toString());
-            }
+                    if (autoCompleteTextView.getText().length() > 1)
+                        getSearch(autoCompleteTextView.getText().toString());
+                }
         );
 
         autoCompleteTextView.setOnItemClickListener((parent, view, position, id) -> {
@@ -94,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         });
     }
 
+    /**
+     * get all previous searches and set it to adapter of autocompletetextview
+     */
     private void setSearchAdapter() {
         mainVM.getAllSearches()
                 .subscribe(new Observer<ArrayList<String>>() {
@@ -104,15 +107,15 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
 
                     @Override
                     public void onNext(ArrayList<String> strings) {
-                        Log.d("MainAct","list obtained "+strings);
-                        ArrayAdapter<String> adapter  = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,strings);
+                        Log.d("MainAct", "list obtained " + strings);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, strings);
                         autoCompleteTextView.setAdapter(adapter);
 
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                            e.printStackTrace();
+                        e.printStackTrace();
                     }
 
                     @Override
@@ -135,12 +138,12 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                     @Override
                     public void onNext(Resource result) {
                         showProgressBar(false);
-                        Log.d("MainAct","pages result "+result.getData());
+                        Log.d("MainAct", "pages result " + result.getData());
                         setSearchAdapter();
 
-                        Toast.makeText(MainActivity.this,"From "+result.getSource(),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "From " + result.getSource(), Toast.LENGTH_SHORT).show();
 
-                        resultRecyclerAdapter =new SearchResultRecyclerAdapter(new ArrayList<>(result.getData()),MainActivity.this);
+                        resultRecyclerAdapter = new SearchResultRecyclerAdapter(new ArrayList<>(result.getData()), MainActivity.this);
                         rvSearchResult.setAdapter(resultRecyclerAdapter);
                         resultRecyclerAdapter.notifyDataSetChanged();
 
@@ -159,8 +162,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 });
     }
 
-    private void  showProgressBar(Boolean show){
-        if(show) {
+    private void showProgressBar(Boolean show) {
+        if (show) {
             btnfetch.setText("");
             pbFetch.setVisibility(View.VISIBLE);
         } else {
@@ -175,7 +178,6 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
     public AndroidInjector<Fragment> fragmentInjector() {
         return dispatchingAndroidInjector;
     }
-
 
 
 }
